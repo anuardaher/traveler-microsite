@@ -53,9 +53,5 @@ export default {
   select {
     padding: 25px 0 5px 6px;
   }
-
-  option {
-    color: black;
-  }
 }
 </style>

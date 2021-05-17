@@ -5,25 +5,32 @@
       <form>
         <base-select label="country" :options="contrys" />
         <search-input> </search-input>
+        <base-button class="action" text="Find Hotels" type="button" />
       </form>
     </div>
     <div class="container__best-hotels">
-      <card v-for="hotel in hotels" :key="hotel.self" :data="hotel" />
+      <div v-if="loading"><load-spinner /></div>
+      <card v-for="hotel in hotels" v-else :key="hotel.self" :data="hotel" />
     </div>
   </div>
 </template>
 
 <script>
 import hotelService from '~/services/hotelServices'
+import weatherService from '~/services/weatherServices'
 import baseSelect from '~/components/form/baseSelect'
 import searchInput from '~/components/form/searchInput'
-import card from '~/components/cards/cardIndex'
+import card from '~/components/cards/hotelCard'
+import baseButton from '~/components/form/baseButton'
+import loadSpinner from '~/components/spinners/loadSpinner'
 
 export default {
   components: {
     baseSelect,
     searchInput,
+    baseButton,
     card,
+    loadSpinner,
   },
   data: () => ({
     hotels: [],
@@ -33,24 +40,70 @@ export default {
       { value: 'pt', text: 'Portugal' },
       { value: 'es', text: 'Spain' },
     ],
-    citys: ['CGH', 'MAD', 'FCO', 'LIS'],
+    citys: ['BSB', 'MAD', 'MXP', 'LIS'],
+    loading: false,
   }),
   mounted() {
-    this.getHotelOffers()
+    this.init()
   },
   methods: {
-    async getHotelOffers() {
-      const promisses = this.citys.map((code) => {
+    async init() {
+      try {
+        this.loading = true
+        const hotels = await this.getHotelOffers()
+        const hotelsWithBestOffer = this.selectBestOffers(hotels)
+        this.setHotelLocationWeather(hotelsWithBestOffer)
+      } catch (error) {
+        console.error(error)
+      } finally {
+        this.loading = false
+      }
+    },
+    getHotelOffers() {
+      const promises = this.citys.map((code) => {
         return hotelService(this.$axios).findHotels({
           cityCode: code,
-          radius: 20,
-          view: 'LIGHT',
+          radius: 300,
+          lang: 'en-US',
         })
       })
-      try {
-        const results = await Promise.all(promisses)
-        this.hotels = results.map((result) => result.data.data.shift())
-      } catch (error) {}
+      return Promise.all(promises)
+    },
+    selectBestOffers(hotels) {
+      return hotels
+        .filter(({ data }) => data.data && data.data.length > 0)
+        .map(({ data }) => {
+          return data.data.reduce((prev, current) => {
+            const prevRating = Number(prev.hotel.rating || 0)
+            const currentRating = Number(prev.hotel.rating || 0)
+            const prevPrice = Number(prev.offers[0]?.price.total || 0)
+            const currentPrice = Number(current.offers[0]?.price.total)
+            const prevDesc = !!prev.hotel.description
+
+            return prevRating >= currentRating &&
+              prevPrice < currentPrice &&
+              prevDesc
+              ? prev
+              : current
+          })
+        })
+    },
+    async getLocationKeys({ latitude, longitude }) {
+      const { data } = await weatherService(this.$axios).getLocationKey(
+        `${latitude},${longitude}`
+      )
+      return data.Key
+    },
+    async getLocationWeather(key) {
+      const { data } = await weatherService(this.$axios).getWeatherData(key)
+      return data.shift()
+    },
+    async setHotelLocationWeather(hotels) {
+      for (let index = 0; index < hotels.length; index++) {
+        const locationKey = await this.getLocationKeys(hotels[index].hotel)
+        hotels[index].weather = await this.getLocationWeather(locationKey)
+        this.hotels.push(hotels[index])
+      }
     },
   },
 }
@@ -63,10 +116,12 @@ export default {
   grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
 
   &__best-hotels {
+    position: relative;
     padding: 20px;
     display: grid;
     gap: 30px;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    place-items: center;
   }
 
   &__find-hotel {
@@ -76,7 +131,6 @@ export default {
       display: block;
       font-weight: 500;
       font-size: clamp(1.7rem, 5vw, 4rem);
-      color: #35495e;
       letter-spacing: 1px;
       word-wrap: break-word;
       text-align: center;
@@ -87,9 +141,10 @@ export default {
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      padding: 50px;
 
-      &:not(:first-child) * {
-        margin-top: 15px;
+      .action {
+        margin-top: 40px;
       }
     }
   }
@@ -98,7 +153,6 @@ export default {
 .subtitle {
   font-weight: 300;
   font-size: 42px;
-  color: #526488;
   word-spacing: 5px;
   padding-bottom: 15px;
 }

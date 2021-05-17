@@ -37,14 +37,14 @@
         a {
           text-decoration: none;
           transition: color 0.3s;
-          color: black;
+          color: var(--primary);
 
           &:hover {
-            color: red;
+            color: var(--secondary);
           }
 
           &:active {
-            text-decoration: red;
+            text-decoration: var(--secondary);
           }
         }
       }

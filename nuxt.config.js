@@ -44,6 +44,10 @@ export default {
       target: 'https://test.api.amadeus.com',
       pathRewrite: { '^/amadeus/': '/' },
     },
+    '/weatherapi/': {
+      target: 'https://dataservice.accuweather.com',
+      pathRewrite: { '^/weatherapi/': '/' },
+    },
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build

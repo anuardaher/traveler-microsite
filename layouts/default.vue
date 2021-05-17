@@ -47,7 +47,7 @@ export default {
       transition: color 0.3s;
 
       &:hover {
-        color: red;
+        color: var(--secondary);
       }
     }
   }
