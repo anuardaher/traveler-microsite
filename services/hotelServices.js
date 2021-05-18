@@ -6,7 +6,6 @@ export default ($axios) => {
   const refreshToken = async () => {
     $axios.setHeader('Content-Type', 'application/x-www-form-urlencoded')
     $axios.setToken(false)
-
     const data = {
       grant_type: 'client_credentials',
       client_id: 'mKvAnUXhIl8wMc56vf7nMQvyETC1ixlM',
@@ -26,8 +25,15 @@ export default ($axios) => {
     })
   }
 
+  const findLocations = (params) => {
+    return $axios.get('/amadeus/v1/reference-data/locations', {
+      params,
+    })
+  }
+
   return {
     findHotels,
     refreshToken,
+    findLocations,
   }
 }

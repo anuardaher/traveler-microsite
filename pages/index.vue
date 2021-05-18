@@ -2,14 +2,36 @@
   <div class="container">
     <div class="container__find-hotel">
       <h1 class="container__find-hotel__title">Find the best hotel for you</h1>
-      <form>
-        <base-select label="country" :options="contrys" />
-        <search-input> </search-input>
-        <base-button class="action" text="Find Hotels" type="button" />
+      <form
+        class="container__find-hotel__form"
+        autocomplete="off"
+        @submit.prevent="init()"
+      >
+        <base-select
+          v-model="form.country"
+          label="country"
+          :options="countrys"
+          required
+        />
+        <base-select
+          v-model="form.city"
+          label="city"
+          :options="citys"
+          :disabled="!form.country"
+          required
+        />
+        <base-button class="action" text="Find Hotel" type="submit" />
       </form>
     </div>
-    <div class="container__best-hotels">
+    <div ref="hotels" class="container__best-hotels">
       <div v-if="loading"><load-spinner /></div>
+      <div
+        v-else-if="!loading && isOnErrorOrEmpty.active"
+        class="container__best-hotels__error"
+      >
+        <h1>{{ isOnErrorOrEmpty.text }}</h1>
+        <h4>{{ isOnErrorOrEmpty.subtitle }}</h4>
+      </div>
       <card v-for="hotel in hotels" v-else :key="hotel.self" :data="hotel" />
     </div>
   </div>
@@ -19,48 +41,88 @@
 import hotelService from '~/services/hotelServices'
 import weatherService from '~/services/weatherServices'
 import baseSelect from '~/components/form/baseSelect'
-import searchInput from '~/components/form/searchInput'
 import card from '~/components/cards/hotelCard'
 import baseButton from '~/components/form/baseButton'
 import loadSpinner from '~/components/spinners/loadSpinner'
+import Citys from '~/mock/citys'
 
 export default {
   components: {
     baseSelect,
-    searchInput,
     baseButton,
     card,
     loadSpinner,
   },
   data: () => ({
+    form: {},
     hotels: [],
-    contrys: [
+    citys: [],
+    countrys: [
       { value: 'br', text: 'Brazil' },
       { value: 'it', text: 'Italy' },
       { value: 'pt', text: 'Portugal' },
       { value: 'es', text: 'Spain' },
     ],
-    citys: ['BSB', 'MAD', 'MXP', 'LIS'],
     loading: false,
+    isOnErrorOrEmpty: {
+      active: false,
+      text: '',
+    },
   }),
+  computed: {
+    citySearch() {
+      return this.form.country
+    },
+    defaultCitys() {
+      return this.countrys.map(({ value }) => {
+        const citys = Citys(value)
+        return citys[Math.floor(Math.random() * citys.length)].value
+      })
+    },
+  },
+  watch: {
+    citySearch(newValue, oldValue) {
+      if (newValue !== oldValue) {
+        this.citys = Citys(newValue)
+      }
+    },
+  },
   mounted() {
     this.init()
   },
   methods: {
     async init() {
       try {
+        this.isOnErrorOrEmpty.active = false
         this.loading = true
         const hotels = await this.getHotelOffers()
-        const hotelsWithBestOffer = this.selectBestOffers(hotels)
-        this.setHotelLocationWeather(hotelsWithBestOffer)
+        const hotelsWithBestOffer = this.filterBestOffers(hotels)
+        try {
+          this.hotels = await this.setHotelLocationWeather(hotelsWithBestOffer)
+        } catch (error) {
+          this.hotels = hotelsWithBestOffer
+        }
       } catch (error) {
-        console.error(error)
+        this.isOnErrorOrEmpty = {
+          active: true,
+          text: 'An error has occurred 😓',
+          subtitle: 'Refresh or try again later',
+        }
       } finally {
         this.loading = false
+        if (this.hotels.length === 0 && !this.isOnErrorOrEmpty.active) {
+          this.isOnErrorOrEmpty = {
+            active: true,
+            text: 'No hotels are available now 😪',
+            subtitle: 'Try a different city or refresh',
+          }
+        }
+        this.$refs.hotels.scrollIntoView()
       }
     },
     getHotelOffers() {
-      const promises = this.citys.map((code) => {
+      const citys = this.form.city ? [this.form.city] : this.defaultCitys
+      const promises = citys.map((code) => {
         return hotelService(this.$axios).findHotels({
           cityCode: code,
           radius: 300,
@@ -69,24 +131,25 @@ export default {
       })
       return Promise.all(promises)
     },
-    selectBestOffers(hotels) {
+    filterBestOffers(hotels) {
       return hotels
         .filter(({ data }) => data.data && data.data.length > 0)
         .map(({ data }) => {
           return data.data.reduce((prev, current) => {
-            const prevRating = Number(prev.hotel.rating || 0)
-            const currentRating = Number(prev.hotel.rating || 0)
-            const prevPrice = Number(prev.offers[0]?.price.total || 0)
-            const currentPrice = Number(current.offers[0]?.price.total)
-            const prevDesc = !!prev.hotel.description
-
-            return prevRating >= currentRating &&
-              prevPrice < currentPrice &&
-              prevDesc
-              ? prev
-              : current
+            return this.compareAndFindBestHotel(prev, current)
           })
         })
+    },
+    compareAndFindBestHotel(prev, current) {
+      const prevRating = Number(prev.hotel.rating || 0)
+      const currentRating = Number(prev.hotel.rating || 0)
+      const prevPrice = Number(prev.offers[0]?.price.total || 0)
+      const currentPrice = Number(current.offers[0]?.price.total)
+      const prevDesc = !!prev.hotel.description
+
+      return prevRating >= currentRating && prevPrice < currentPrice && prevDesc
+        ? prev
+        : current
     },
     async getLocationKeys({ latitude, longitude }) {
       const { data } = await weatherService(this.$axios).getLocationKey(
@@ -98,12 +161,13 @@ export default {
       const { data } = await weatherService(this.$axios).getWeatherData(key)
       return data.shift()
     },
-    async setHotelLocationWeather(hotels) {
-      for (let index = 0; index < hotels.length; index++) {
-        const locationKey = await this.getLocationKeys(hotels[index].hotel)
-        hotels[index].weather = await this.getLocationWeather(locationKey)
-        this.hotels.push(hotels[index])
-      }
+    setHotelLocationWeather(hotels) {
+      const promises = hotels.map(async (data) => {
+        const locationKey = await this.getLocationKeys(data.hotel)
+        data.weather = await this.getLocationWeather(locationKey)
+        return data
+      })
+      return Promise.all(promises)
     },
   },
 }
@@ -111,21 +175,30 @@ export default {
 
 <style lang="scss" scoped>
 .container {
-  display: grid;
-  grid-gap: 20px;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
 
   &__best-hotels {
     position: relative;
-    padding: 20px;
+    flex: 1 1 700px;
+    padding: 0px 5px 25px 5px;
     display: grid;
-    gap: 30px;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     place-items: center;
+
+    &__error {
+      text-align: center;
+      padding: 10px;
+    }
   }
 
   &__find-hotel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     padding: 20px;
+    flex: 1 1 800px;
 
     &__title {
       display: block;
@@ -136,12 +209,18 @@ export default {
       text-align: center;
     }
 
-    form {
+    &__form {
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      padding: 50px;
+      margin: 50px;
+      width: 100%;
+      max-width: 500px;
+
+      > *:not(:first-child) {
+        margin-top: 10px;
+      }
 
       .action {
         margin-top: 40px;

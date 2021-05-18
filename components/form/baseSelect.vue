@@ -1,9 +1,14 @@
 <template>
-  <div class="container">
+  <div class="base">
     <label v-if="label" for="base-input">{{ formatLabel }}</label>
-    <select id="base-select" v-bind="$attrs">
+    <select
+      id="base-select"
+      v-bind="$attrs"
+      @input="$emit('input', $event.target.value)"
+    >
+      <option value="" />
       <option
-        v-for="option in options"
+        v-for="option in orderedOptions"
         :key="option.value"
         :value="option.value"
       >
@@ -36,13 +41,22 @@ export default {
         this.label.charAt(0).toUpperCase() + this.label.slice(1).toLowerCase()
       )
     },
+    orderedOptions() {
+      const optionsCopy = [...this.options]
+      return optionsCopy.sort((a, b) => {
+        if (a.text > b.text) return 1
+        if (a.text < b.text) return -1
+        return 0
+      })
+    },
   },
 }
 </script>
 
 <style lang="scss" scoped>
-.container {
+.base {
   position: relative;
+  width: 100%;
 
   label {
     position: absolute;

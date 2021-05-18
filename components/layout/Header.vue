@@ -3,7 +3,7 @@
     <div class="nav__logo">
       <img src="/logo_desktop.png" alt="logo" />
     </div>
-    <div class="nav__actions">
+    <!-- <div class="nav__actions">
       <ul>
         <li>
           <NuxtLink to="/hotels">Hotels</NuxtLink>
@@ -12,7 +12,7 @@
           <NuxtLink to="/hotels">Contrys</NuxtLink>
         </li>
       </ul>
-    </div>
+    </div> -->
   </nav>
 </template>
 
@@ -47,6 +47,19 @@
             text-decoration: var(--secondary);
           }
         }
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  .nav {
+    &__logo {
+      margin: 0 auto;
+
+      img {
+        height: auto;
+        width: 100%;
       }
     }
   }

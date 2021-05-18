@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="base">
     <button v-bind="$attrs" :style="{ backgroundColor, color }">
       <slot />
       {{ text }}
@@ -28,8 +28,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.container {
-  margin: 10px;
+.base {
+  width: 100%;
 }
 button {
   padding: 10px;
@@ -38,6 +38,7 @@ button {
   border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 5px;
   transition: opacity 0.2s;
+  width: 100%;
 
   &:hover {
     opacity: 0.8;

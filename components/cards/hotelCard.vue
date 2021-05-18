@@ -7,7 +7,7 @@
       <div class="card__img__flag">
         <img :src="getCountryFlag.flag" alt="" />
       </div>
-      <div class="card__img__weather">
+      <div v-if="data.weather" class="card__img__weather">
         <i :class="getWeatherIcon"></i>
         <div>{{ getTemperature }}</div>
       </div>
@@ -62,10 +62,7 @@ export default {
   },
   computed: {
     getCountryFlag() {
-      const countryInfo = {
-        flag: '/imgs/br.png',
-        background: '/imgs/br-background-image.jpg',
-      }
+      const countryInfo = {}
       if (!this.data && !this.data.hotel) return countryInfo
       switch (this.data.hotel.address.countryCode) {
         case 'IT':
@@ -81,7 +78,8 @@ export default {
           countryInfo.background = '/imgs/lisboa-background.jpg'
           break
         default:
-          return countryInfo
+          countryInfo.flag = '/imgs/br.png'
+          countryInfo.background = '/imgs/br-background-image.jpg'
       }
       return countryInfo
     },
@@ -118,6 +116,7 @@ export default {
   border-radius: 5px;
   height: 300px;
   max-width: 450px;
+  min-width: 320;
 
   &:hover {
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.15);
@@ -176,7 +175,7 @@ export default {
 
     &__city {
       color: white;
-      font-size: 2rem;
+      font-size: 1.7rem;
       z-index: 2;
       margin: 8px 15px;
     }

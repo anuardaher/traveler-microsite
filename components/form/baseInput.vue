@@ -1,19 +1,20 @@
 <template>
-  <div class="container">
+  <div class="base">
     <label v-if="label" for="base-input">{{ formatLabel }}</label>
-    <div
-      :class="{ container__icon: icon, 'container__icon__with-label': label }"
-    >
+    <div :class="{ base__icon: icon, 'base__icon__with-label': label }">
       <slot />
     </div>
     <input
       id="base-input"
       :class="{
-        'container__input-label': label,
-        'container__input-icon': icon,
+        'base__input-label': label,
+        'base__input-icon': icon,
       }"
       v-bind="$attrs"
       :value="value"
+      @focus="$emit('focus')"
+      @blur="$emit('blur')"
+      @input="$emit('input', $event.target.value)"
     />
   </div>
 </template>
@@ -46,8 +47,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.container {
+.base {
   position: relative;
+  width: 100%;
 
   &__icon {
     position: absolute;
