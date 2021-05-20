@@ -186,8 +186,8 @@ export default {
       const prevPrice = Number(prev.offers[0].price.total || 0)
       const currentPrice = Number(current.offers[0].price.total || 0)
 
-      if (prevPrice >= currentPrice && prevRating >= currentRating) return 1
-      if (prevPrice <= currentPrice && prevRating <= currentRating) return -1
+      if (prevPrice >= currentPrice && prevRating <= currentRating) return 1
+      if (prevPrice <= currentPrice && prevRating >= currentRating) return -1
       return 0
     },
     async getLocationKeys({ latitude, longitude }) {
