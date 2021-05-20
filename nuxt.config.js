@@ -2,7 +2,7 @@ export default {
   ssr: false,
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'traveler-microsite',
+    title: 'Traveler Microsite',
     htmlAttrs: {
       lang: 'en',
     },
