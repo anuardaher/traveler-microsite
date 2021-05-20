@@ -5,7 +5,7 @@
       <form
         class="container__find-hotel__form"
         autocomplete="off"
-        @submit.prevent="init()"
+        @submit.prevent="searchBestHotels()"
       >
         <base-select
           v-model="form.country"
@@ -29,10 +29,22 @@
         v-else-if="!loading && isOnErrorOrEmpty.active"
         class="container__best-hotels__error"
       >
-        <h1>{{ isOnErrorOrEmpty.text }}</h1>
-        <h4>{{ isOnErrorOrEmpty.subtitle }}</h4>
+        <error
+          :title="isOnErrorOrEmpty.title"
+          :subtitle="isOnErrorOrEmpty.subtitle"
+        />
       </div>
-      <card v-for="hotel in hotels" v-else :key="hotel.self" :data="hotel" />
+
+      <nuxt-link
+        v-for="hotel in hotels"
+        v-else
+        :key="hotel.self"
+        tag="div"
+        :to="`/hotel/${hotel.hotel.hotelId}`"
+        class="container__best-hotels__card"
+      >
+        <hotel-card :data="hotel" clickable />
+      </nuxt-link>
     </div>
   </div>
 </template>
@@ -41,32 +53,35 @@
 import hotelService from '~/services/hotelServices'
 import weatherService from '~/services/weatherServices'
 import baseSelect from '~/components/form/baseSelect'
-import card from '~/components/cards/hotelCard'
+import hotelCard from '~/components/cards/hotelCard'
 import baseButton from '~/components/form/baseButton'
 import loadSpinner from '~/components/spinners/loadSpinner'
 import Citys from '~/mock/citys'
+import Error from '~/components/errorHandler/error.vue'
 
 export default {
   components: {
     baseSelect,
     baseButton,
-    card,
+    hotelCard,
     loadSpinner,
+    Error,
   },
   data: () => ({
     form: {},
     hotels: [],
     citys: [],
     countrys: [
-      { value: 'br', text: 'Brazil' },
-      { value: 'it', text: 'Italy' },
-      { value: 'pt', text: 'Portugal' },
-      { value: 'es', text: 'Spain' },
+      { value: 'BR', text: 'Brazil' },
+      { value: 'IT', text: 'Italy' },
+      { value: 'PT', text: 'Portugal' },
+      { value: 'ES', text: 'Spain' },
     ],
     loading: false,
     isOnErrorOrEmpty: {
       active: false,
-      text: '',
+      title: '',
+      subtitle: '',
     },
   }),
   computed: {
@@ -88,10 +103,10 @@ export default {
     },
   },
   mounted() {
-    this.init()
+    this.searchBestHotels()
   },
   methods: {
-    async init() {
+    async searchBestHotels() {
       try {
         this.isOnErrorOrEmpty.active = false
         this.loading = true
@@ -105,7 +120,7 @@ export default {
       } catch (error) {
         this.isOnErrorOrEmpty = {
           active: true,
-          text: 'An error has occurred 😓',
+          title: 'An error has occurred 😓',
           subtitle: 'Refresh or try again later',
         }
       } finally {
@@ -113,43 +128,57 @@ export default {
         if (this.hotels.length === 0 && !this.isOnErrorOrEmpty.active) {
           this.isOnErrorOrEmpty = {
             active: true,
-            text: 'No hotels are available now 😪',
+            title: 'No hotels are available now 😪',
             subtitle: 'Try a different city or refresh',
           }
         }
-        this.$refs.hotels.scrollIntoView()
+        this.$refs.hotels.scrollIntoView({
+          block: 'end',
+          behavior: 'smooth',
+        })
       }
     },
-    getHotelOffers() {
+    async getHotelOffers() {
       const citys = this.form.city ? [this.form.city] : this.defaultCitys
       const promises = citys.map((code) => {
         return hotelService(this.$axios).findHotels({
           cityCode: code,
           radius: 300,
           lang: 'en-US',
+          sort: 'PRICE',
         })
       })
-      return Promise.all(promises)
+      const hotels = await Promise.all(promises)
+      return hotels.map(({ data }) => data.data).flat()
     },
     filterBestOffers(hotels) {
-      return hotels
-        .filter(({ data }) => data.data && data.data.length > 0)
-        .map(({ data }) => {
-          return data.data.reduce((prev, current) => {
-            return this.compareAndFindBestHotel(prev, current)
-          })
+      const sortedHotels = hotels
+        .filter((data) => data && data.hotel.description)
+        .sort((a, b) => {
+          return this.compareAndFindBestHotel(a, b)
         })
+      if (this.form.country) {
+        return sortedHotels
+          .filter(
+            ({ hotel }) => hotel.address.countryCode === this.form.country
+          )
+          .slice(0, 4)
+      }
+      return this.countrys
+        .map((country) =>
+          sortedHotels.find(
+            (data) => data.hotel.address.countryCode === country.value
+          )
+        )
+        .filter((hotel) => !!hotel)
     },
     compareAndFindBestHotel(prev, current) {
       const prevRating = Number(prev.hotel.rating || 0)
       const currentRating = Number(prev.hotel.rating || 0)
-      const prevPrice = Number(prev.offers[0]?.price.total || 0)
-      const currentPrice = Number(current.offers[0]?.price.total)
-      const prevDesc = !!prev.hotel.description
 
-      return prevRating >= currentRating && prevPrice < currentPrice && prevDesc
-        ? prev
-        : current
+      if (prevRating >= currentRating) return 1
+      if (prevRating <= currentRating) return -1
+      return 0
     },
     async getLocationKeys({ latitude, longitude }) {
       const { data } = await weatherService(this.$axios).getLocationKey(
@@ -177,33 +206,21 @@ export default {
 .container {
   display: flex;
   flex-wrap: wrap;
-
-  &__best-hotels {
-    position: relative;
-    flex: 1 1 700px;
-    padding: 0px 5px 25px 5px;
-    display: grid;
-    grid-gap: 10px;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    place-items: center;
-
-    &__error {
-      text-align: center;
-      padding: 10px;
-    }
-  }
+  gap: 20px;
+  align-items: center;
+  min-height: 700px;
+  padding: 10px;
 
   &__find-hotel {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
-    flex: 1 1 800px;
+    flex: 1 1 500px;
 
     &__title {
       display: block;
       font-weight: 500;
-      font-size: clamp(1.7rem, 5vw, 4rem);
+      font-size: clamp(1.8rem, 4vw, 3rem);
       letter-spacing: 1px;
       word-wrap: break-word;
       text-align: center;
@@ -225,6 +242,23 @@ export default {
       .action {
         margin-top: 40px;
       }
+    }
+  }
+
+  &__best-hotels {
+    position: relative;
+    flex: 1 1 900px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+
+    &__card {
+      max-width: 500px;
+      height: 330px;
+      flex: 1 1 400px;
     }
   }
 }

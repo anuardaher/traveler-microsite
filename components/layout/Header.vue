@@ -1,8 +1,8 @@
 <template>
   <nav class="nav">
-    <div class="nav__logo">
+    <nuxt-link to="/" class="nav__logo">
       <img src="/logo_desktop.png" alt="logo" />
-    </div>
+    </nuxt-link>
     <!-- <div class="nav__actions">
       <ul>
         <li>
@@ -56,6 +56,7 @@
   .nav {
     &__logo {
       margin: 0 auto;
+      width: 50%;
 
       img {
         height: auto;

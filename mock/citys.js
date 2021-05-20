@@ -1,25 +1,25 @@
 export default (country) => {
   const citys = {
-    br: [
+    BR: [
       { value: 'BSB', text: 'Brasilia' },
       { value: 'GYN', text: 'Goiânia' },
       { value: 'CGH', text: 'São Paulo' },
       { value: 'VIX', text: 'Vitória' },
       { value: 'GIG', text: 'Rio de Janeiro' },
     ],
-    it: [
+    IT: [
       { value: 'FCO', text: 'Rome' },
       { value: 'BGY', text: 'Bergamo' },
       { value: 'NAP', text: 'Napoli' },
       { value: 'PMO', text: 'Palermo' },
       { value: 'MXP', text: 'Milan' },
     ],
-    pt: [
+    PT: [
       { value: 'OPO', text: 'Porto' },
       { value: 'LIS', text: 'Lisbon' },
       { value: 'FAO', text: 'Faro' },
     ],
-    es: [
+    ES: [
       { value: 'MAD', text: 'Madrid' },
       { value: 'BCN', text: 'Barcelona' },
       { value: 'AGP', text: 'Málaga' },

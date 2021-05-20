@@ -1,4 +1,5 @@
 export default {
+  ssr: false,
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     title: 'traveler-microsite',
@@ -48,6 +49,13 @@ export default {
       target: 'https://dataservice.accuweather.com',
       pathRewrite: { '^/weatherapi/': '/' },
     },
+  },
+
+  env: {
+    HOTEL_API_CLIENT_ID: process.env.HOTEL_API_CLIENT_ID,
+    HOTEL_API_CLIENT_SECRET: process.env.HOTEL_API_CLIENT_SECRET,
+    WEATHER_API_SECRET: process.env.WEATHER_API_SECRET,
+    MAPS_API: process.env.MAPS_API,
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build

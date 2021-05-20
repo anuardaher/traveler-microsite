@@ -28,11 +28,11 @@ export default {
   width: 100vw;
 
   header {
-    height: 15vh;
+    height: 10vh;
   }
 
   main {
-    min-height: 80vh;
+    min-height: 85vh;
   }
 
   footer {

@@ -1,5 +1,11 @@
 <template>
-  <div class="card">
+  <div
+    :class="[
+      'card',
+      clickable ? 'clickable' : null,
+      details ? 'without-border' : null,
+    ]"
+  >
     <div
       class="card__img"
       :style="`background-image: url(${getCountryFlag.background})`"
@@ -14,20 +20,91 @@
       <div class="card__img__city">{{ data.hotel.address.cityName }}</div>
     </div>
     <div class="card__content">
-      <div class="card__content__starts">
-        <base-icon
-          v-for="star in Number(data.hotel.rating)"
-          :key="star"
-          icon-color="#efce2c"
-        >
-          <star-icon />
-        </base-icon>
+      <div class="card__content__header">
+        <div class="card__content__header__hotel">
+          <div class="card__content__header__hotel__rating">
+            <base-icon
+              v-for="rating in Number(data.hotel.rating)"
+              :key="rating"
+              icon-color="var(--starColor)"
+            >
+              <star-icon />
+            </base-icon>
+          </div>
+          <h1 class="card__content__header__hotel__name">
+            {{ data.hotel.name }}
+          </h1>
+        </div>
+        <div v-if="details" class="card__content__header__price">
+          {{ hotelPrice }}<span>/night</span>
+        </div>
       </div>
-      <h1 class="card__content__name">{{ data.hotel.name }}</h1>
-      <h3 class="card__content__description">
+      <p
+        :class="['card__content__description', !details ? 'short-text' : null]"
+      >
         {{ data.hotel.description.text }}
-      </h3>
-      <div class="card__content__price">
+      </p>
+      <div v-if="details" class="card__content__information">
+        <div class="card__content__information__date">
+          <h3 class="card__content__information__date__title">Date</h3>
+          <div class="card__content__information__date__checkin">
+            <span class="material-icons">event</span>
+            <span
+              >{{
+                new Date(offer.checkInDate).toLocaleDateString()
+              }}
+              check-in</span
+            >
+          </div>
+          <div class="card__content__information__date__checkout">
+            <span class="material-icons">event</span>
+            <span
+              >{{
+                new Date(offer.checkOutDate).toLocaleDateString()
+              }}
+              check-out</span
+            >
+          </div>
+        </div>
+        <div class="card__content__information__contact">
+          <h3>Contact</h3>
+          <div>
+            <span class="material-icons">phone</span
+            >{{ data.hotel.contact.phone || 'Unavailable' }}
+          </div>
+          <div>
+            <span class="material-icons">email</span
+            >{{ data.hotel.contact.email || 'Unavailable' }}
+          </div>
+        </div>
+        <div class="card__content__information__amenities">
+          <h3 class="card__content__information__amenities__title">
+            Amenities
+          </h3>
+          <div v-for="amenitie in getAmenitiesList" :key="amenitie">
+            <span :title="amenitie.toLowerCase()" class="material-icons"
+              >{{ amenitie.toLowerCase() }}
+            </span>
+            <span>{{ amenitie }}</span>
+          </div>
+        </div>
+        <div class="card__content__information__room">
+          <h3 class="card__content__information__room__title">Room</h3>
+          <div class="card__content__information__room__guest">
+            <span class="material-icons">emoji_people</span>
+            <span>{{ offer.guests.adults }} Guest </span>
+          </div>
+          <div class="card__content__information__room__guest">
+            <span class="material-icons">king_bed</span>
+            <span
+              >{{ offer.room.typeEstimated.beds }}
+              {{ offer.room.typeEstimated.bedType }}</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <div v-if="!details" class="card__content__price">
         {{ hotelPrice }}<span>/night</span>
       </div>
     </div>
@@ -36,7 +113,7 @@
 
 <script>
 import baseIcon from '~/components/icons/BaseIcon'
-import starIcon from '~/components/icons/startIcon'
+import starIcon from '~/components/icons/starIcon'
 
 export default {
   components: {
@@ -59,7 +136,27 @@ export default {
         },
       }),
     },
+    clickable: {
+      type: Boolean,
+      default: false,
+    },
+    details: {
+      type: Boolean,
+      default: false,
+    },
   },
+  data: () => ({
+    amenitiesList: [
+      'air',
+      'atm',
+      'accessible',
+      'wifi',
+      'tv',
+      'meeting_room',
+      'restaurant',
+      'fitness_center',
+    ],
+  }),
   computed: {
     getCountryFlag() {
       const countryInfo = {}
@@ -102,32 +199,37 @@ export default {
       iconNumber = iconNumber.length === 1 ? '0' + iconNumber : iconNumber
       return `wi icon-accu${iconNumber}`
     },
+    getAmenitiesList() {
+      return this.amenitiesList.filter((amenitie) => {
+        const regex = new RegExp(amenitie, 'i')
+        return this.data.hotel.amenities.find((icon) => regex.test(icon))
+      })
+    },
+    offer() {
+      return this.data.offers[0]
+    },
   },
 }
 </script>
 
 <style lang="scss">
-@import 'https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.9/css/weather-icons.min.css';
+@import '~/assets/css/materialIcons.scss';
 @import '~/assets/css/accuweatherIcons.scss';
 
 .card {
   position: relative;
   border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 5px;
-  height: 300px;
-  max-width: 450px;
-  min-width: 320;
-
-  &:hover {
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.15);
-  }
+  width: 100%;
+  min-width: 320px;
+  min-height: 300px;
 
   &__img {
     position: relative;
     background-size: 100%;
     background-repeat: no-repeat;
     background-position: center;
-    height: 40%;
+    height: 150px;
     display: flex;
     justify-content: flex-end;
     align-items: flex-end;
@@ -187,25 +289,67 @@ export default {
     padding: 5px;
     height: 60%;
 
-    &__starts {
+    &__header {
       display: flex;
-    }
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      &__hotel {
+        &__rating {
+          display: flex;
+        }
 
-    &__name {
-      font-size: 1.1rem;
-      text-transform: uppercase;
-      font-weight: 700;
-      padding: 3px;
+        &__name {
+          font-size: clamp(1.1rem, 2vw, 1.2rem);
+          text-transform: uppercase;
+          font-weight: 700;
+          padding: 3px;
+        }
+      }
+
+      &__price {
+        font-weight: 700;
+        font-size: clamp(1.5rem, 2vw, 1.9rem);
+        margin-top: auto;
+
+        span {
+          font-size: 0.8rem;
+          font-weight: 400;
+          margin-left: 3px;
+        }
+      }
     }
 
     &__description {
-      font-size: 0.8rem;
+      font-size: clamp(0.8rem, 1vw, 0.9rem);
       font-weight: 400;
       padding: 3px;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+      margin: 10px 0;
+    }
+
+    &__information {
+      display: flex;
+      justify-content: space-around;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 30px;
+
+      > * {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        flex: 1 1 200px;
+
+        > * {
+          margin: 5px;
+          display: flex;
+
+          > * {
+            align-items: center;
+            margin: 5px;
+          }
+        }
+      }
     }
 
     &__price {
@@ -222,5 +366,24 @@ export default {
       }
     }
   }
+}
+
+.clickable {
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.short-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow-y: hidden;
+}
+
+.without-border {
+  border: none;
 }
 </style>

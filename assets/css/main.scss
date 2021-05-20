@@ -2,6 +2,7 @@
   --primary: #35495e;
   --secondary: #d40e14;
   --light: #f3ecec;
+  --starColor: #efce2c;
 }
 
 html {
@@ -40,6 +41,7 @@ select {
   border: 1px solid silver;
   box-shadow: none;
   transition: all 0.2s;
+  background-color: transparent;
 
   &:focus,
   &:hover {

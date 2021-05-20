@@ -1,15 +1,15 @@
 const querystring = require('querystring')
 
-export default ($axios) => {
-  $axios.setToken(window.localStorage.getItem('hotelToken'), 'Bearer')
+export default ($axios, key) => {
+  $axios.setToken(key || window.localStorage.getItem('hotelToken'), 'Bearer')
 
   const refreshToken = async () => {
     $axios.setHeader('Content-Type', 'application/x-www-form-urlencoded')
     $axios.setToken(false)
     const data = {
       grant_type: 'client_credentials',
-      client_id: 'mKvAnUXhIl8wMc56vf7nMQvyETC1ixlM',
-      client_secret: 'ulcTGu1XVUDWCKby',
+      client_id: process.env.HOTEL_API_CLIENT_ID,
+      client_secret: process.env.HOTEL_API_CLIENT_SECRET,
     }
     const response = await $axios.post(
       '/amadeus/v1/security/oauth2/token',
