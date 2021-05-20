@@ -26,6 +26,7 @@
 
 <script>
 import hotelService from '~/services/hotelServices'
+import weatherService from '~/services/weatherServices'
 import hotelCard from '~/components/cards/hotelCard'
 import googleMap from '~/components/maps/googleMap'
 import loadSpinner from '~/components/spinners/loadSpinner'
@@ -58,22 +59,27 @@ export default {
     },
   },
   mounted() {
-    this.getHotelData()
+    this.init()
   },
   methods: {
-    async getHotelData(params) {
+    async init() {
       this.loading = true
-      const hotelId = this.$route.params.id
       try {
-        const { data } = await hotelService(this.$axios).findHotels({
-          hotelIds: hotelId,
-        })
-        this.data = data.data.length ? data.data[0] : null
-      } catch (err) {
+        debugger
+        const hotel = await this.getHotelData()
+        try {
+          const locationKey = await this.getLocationKeys(hotel)
+          hotel.weather = await this.getLocationWeather(locationKey)
+          this.data = hotel
+        } catch (error) {
+          this.data = hotel
+          this.loading = false
+        }
+      } catch (error) {
         this.isOnErrorOrEmpty = {
           active: true,
-          title: 'Error',
-          subtitle: 'Subtitle error',
+          title: 'An error has ocurred 😐',
+          subtitle: 'Try again later',
         }
       } finally {
         if (!this.data && this.isOnErrorOrEmpty.active) {
@@ -85,6 +91,28 @@ export default {
         }
         this.loading = false
       }
+    },
+    async getHotelData() {
+      const hotelId = this.$route.params.id
+      const { data } = await hotelService(this.$axios).findHotels({
+        hotelIds: hotelId,
+        lang: 'en-US',
+      })
+      if (!data.data || !data.data.length) throw new Error('Not found')
+      return data.data[0]
+    },
+    async getLocationKeys({ latitude, longitude }) {
+      const { data } = await weatherService(this.$axios).getLocationKey(
+        `${latitude},${longitude}`
+      )
+      if (!data || !data.key) throw new Error('Location key not found')
+      return data.key
+    },
+    async getLocationWeather(key) {
+      const { data } = await weatherService(this.$axios).getWeatherData(key)
+
+      if (!data || !data.length) throw new Error('Weather status not found')
+      return data.shift()
     },
   },
 }

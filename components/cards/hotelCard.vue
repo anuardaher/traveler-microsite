@@ -77,7 +77,10 @@
             >{{ data.hotel.contact.email || 'Unavailable' }}
           </div>
         </div>
-        <div class="card__content__information__amenities">
+        <div
+          v-if="getAmenitiesList.length"
+          class="card__content__information__amenities"
+        >
           <h3 class="card__content__information__amenities__title">
             Amenities
           </h3>
@@ -88,13 +91,21 @@
             <span>{{ amenitie }}</span>
           </div>
         </div>
-        <div class="card__content__information__room">
+        <div
+          v-if="offer.room || offer.guest"
+          class="card__content__information__room"
+        >
           <h3 class="card__content__information__room__title">Room</h3>
           <div class="card__content__information__room__guest">
             <span class="material-icons">emoji_people</span>
             <span>{{ offer.guests.adults }} Guest </span>
           </div>
-          <div class="card__content__information__room__guest">
+          <div
+            v-if="
+              offer.room.typeEstimated.beds && offer.room.typeEstimated.bedType
+            "
+            class="card__content__information__room__guest"
+          >
             <span class="material-icons">king_bed</span>
             <span
               >{{ offer.room.typeEstimated.beds }}
@@ -343,11 +354,8 @@ export default {
         > * {
           margin: 5px;
           display: flex;
-
-          > * {
-            align-items: center;
-            margin: 5px;
-          }
+          align-items: center;
+          gap: 10px;
         }
       }
     }

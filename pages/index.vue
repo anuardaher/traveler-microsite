@@ -11,15 +11,16 @@
           v-model="form.country"
           label="country"
           :options="countrys"
-          required
         />
         <base-select
           v-model="form.city"
           label="city"
           :options="citys"
           :disabled="!form.country"
-          required
+          :required="!!form.country"
         />
+        <base-input v-model="checkin" type="date" label="checkin" />
+        <base-input v-model="checkout" type="date" label="checkout" />
         <base-button class="action" text="Find Hotel" type="submit" />
       </form>
     </div>
@@ -53,6 +54,7 @@
 import hotelService from '~/services/hotelServices'
 import weatherService from '~/services/weatherServices'
 import baseSelect from '~/components/form/baseSelect'
+import baseInput from '~/components/form/baseInput'
 import hotelCard from '~/components/cards/hotelCard'
 import baseButton from '~/components/form/baseButton'
 import loadSpinner from '~/components/spinners/loadSpinner'
@@ -62,6 +64,7 @@ import Error from '~/components/errorHandler/error.vue'
 export default {
   components: {
     baseSelect,
+    baseInput,
     baseButton,
     hotelCard,
     loadSpinner,
@@ -83,6 +86,11 @@ export default {
       title: '',
       subtitle: '',
     },
+    checkin: new Date().toLocaleDateString('en-CA'),
+    // adding one day, sorry about this mess :(
+    checkout: new Date(
+      new Date().setDate(new Date().getDate() + 1)
+    ).toLocaleDateString('en-CA'),
   }),
   computed: {
     citySearch() {
@@ -144,8 +152,8 @@ export default {
         return hotelService(this.$axios).findHotels({
           cityCode: code,
           radius: 300,
-          lang: 'en-US',
-          sort: 'PRICE',
+          checkInDate: this.checkin,
+          checkOutDate: this.checkout,
         })
       })
       const hotels = await Promise.all(promises)
@@ -175,9 +183,11 @@ export default {
     compareAndFindBestHotel(prev, current) {
       const prevRating = Number(prev.hotel.rating || 0)
       const currentRating = Number(prev.hotel.rating || 0)
+      const prevPrice = Number(prev.offers[0].price.total || 0)
+      const currentPrice = Number(current.offers[0].price.total || 0)
 
-      if (prevRating >= currentRating) return 1
-      if (prevRating <= currentRating) return -1
+      if (prevPrice >= currentPrice && prevRating >= currentRating) return 1
+      if (prevPrice <= currentPrice && prevRating <= currentRating) return -1
       return 0
     },
     async getLocationKeys({ latitude, longitude }) {
@@ -206,16 +216,16 @@ export default {
 .container {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 30px;
   align-items: center;
   min-height: 700px;
-  padding: 10px;
 
   &__find-hotel {
     display: flex;
     flex-direction: column;
     align-items: center;
     flex: 1 1 500px;
+    padding: 10px;
 
     &__title {
       display: block;
@@ -251,13 +261,13 @@ export default {
     display: flex;
     gap: 20px;
     flex-wrap: wrap;
-    justify-content: center;
     align-items: center;
+    justify-content: space-evenly;
     min-height: 300px;
+    padding: 10px;
 
     &__card {
       max-width: 500px;
-      height: 330px;
       flex: 1 1 400px;
     }
   }
