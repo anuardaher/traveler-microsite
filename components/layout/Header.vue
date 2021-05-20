@@ -3,27 +3,35 @@
     <nuxt-link to="/" class="nav__logo">
       <img src="/logo_desktop.png" alt="logo" />
     </nuxt-link>
-    <!-- <div class="nav__actions">
+    <div class="nav__actions">
       <ul>
-        <li>
-          <NuxtLink to="/hotels">Hotels</NuxtLink>
-        </li>
-        <li>
-          <NuxtLink to="/hotels">Contrys</NuxtLink>
+        <li class="nav__actions__search" @click="setStateSearch()">
+          <span class="material-icons">create</span>
         </li>
       </ul>
-    </div> -->
+    </div>
   </nav>
 </template>
 
+<script>
+export default {
+  methods: {
+    setStateSearch() {
+      this.$root.$emit('search')
+    },
+  },
+}
+</script>
+
 <style lang="scss" scoped>
 .nav {
-  padding: 20px 30px;
+  padding: 15px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 
   &__actions {
-    flex: 1 1;
+    display: none;
     font-size: 1.2rem;
     text-decoration: none;
 
@@ -54,13 +62,28 @@
 
 @media only screen and (max-width: 600px) {
   .nav {
+    justify-content: space-around;
+    padding: 6px;
     &__logo {
-      margin: 0 auto;
       width: 50%;
 
       img {
         height: auto;
         width: 100%;
+      }
+    }
+
+    &__actions {
+      display: flex;
+
+      &__search {
+        height: 40px;
+        width: 40px;
+        display: grid;
+        place-items: center;
+        background-color: var(--secondary);
+        color: var(--light);
+        border-radius: 50%;
       }
     }
   }

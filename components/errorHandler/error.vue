@@ -32,8 +32,6 @@ export default {
 </script>
 
 <style lang="scss">
-@import '~/assets/css/materialIcons.scss';
-
 .error {
   display: grid;
   place-items: center;

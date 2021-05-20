@@ -150,6 +150,7 @@ export default {
 
 @media only screen and (max-width: 600px) {
   .details {
+    padding: 0.3rem;
     &__hotel {
       &__bgimage {
         &:after {

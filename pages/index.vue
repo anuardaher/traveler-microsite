@@ -1,29 +1,33 @@
 <template>
   <div class="container">
-    <div class="container__find-hotel">
-      <h1 class="container__find-hotel__title">Find the best hotel for you</h1>
-      <form
-        class="container__find-hotel__form"
-        autocomplete="off"
-        @submit.prevent="searchBestHotels()"
-      >
-        <base-select
-          v-model="form.country"
-          label="country"
-          :options="countrys"
-        />
-        <base-select
-          v-model="form.city"
-          label="city"
-          :options="citys"
-          :disabled="!form.country"
-          :required="!!form.country"
-        />
-        <base-input v-model="checkin" type="date" label="checkin" />
-        <base-input v-model="checkout" type="date" label="checkout" />
-        <base-button class="action" text="Find Hotel" type="submit" />
-      </form>
-    </div>
+    <transition name="fade">
+      <div v-if="!isOnSmallDevice || searchState" class="container__find-hotel">
+        <h1 class="container__find-hotel__title">
+          Find the best hotel for you
+        </h1>
+        <form
+          class="container__find-hotel__form"
+          autocomplete="off"
+          @submit.prevent="searchBestHotels()"
+        >
+          <base-select
+            v-model="form.country"
+            label="country"
+            :options="countrys"
+          />
+          <base-select
+            v-model="form.city"
+            label="city"
+            :options="citys"
+            :disabled="!form.country"
+            :required="!!form.country"
+          />
+          <base-input v-model="checkin" type="date" label="checkin" />
+          <base-input v-model="checkout" type="date" label="checkout" />
+          <base-button class="action" text="Find Hotel" type="submit" />
+        </form>
+      </div>
+    </transition>
     <div ref="hotels" class="container__best-hotels">
       <div v-if="loading"><load-spinner /></div>
       <div
@@ -86,6 +90,7 @@ export default {
       title: '',
       subtitle: '',
     },
+    searchState: false,
     checkin: new Date().toLocaleDateString('en-CA'),
     // adding one day, sorry about this mess :(
     checkout: new Date(
@@ -102,6 +107,9 @@ export default {
         return citys[Math.floor(Math.random() * citys.length)].value
       })
     },
+    isOnSmallDevice() {
+      return window.screen.width < 600
+    },
   },
   watch: {
     citySearch(newValue, oldValue) {
@@ -112,9 +120,14 @@ export default {
   },
   mounted() {
     this.searchBestHotels()
+    this.$root.$on('search', () => (this.searchState = !this.searchState))
   },
   methods: {
     async searchBestHotels() {
+      this.$refs.hotels.scrollIntoView({
+        block: 'end',
+        behavior: 'smooth',
+      })
       try {
         this.isOnErrorOrEmpty.active = false
         this.loading = true
@@ -140,10 +153,6 @@ export default {
             subtitle: 'Try a different city or refresh',
           }
         }
-        this.$refs.hotels.scrollIntoView({
-          block: 'end',
-          behavior: 'smooth',
-        })
       }
     },
     async getHotelOffers() {
@@ -218,7 +227,7 @@ export default {
   flex-wrap: wrap;
   gap: 30px;
   align-items: center;
-  min-height: 700px;
+  min-height: 80vh;
 
   &__find-hotel {
     display: flex;
@@ -230,7 +239,7 @@ export default {
     &__title {
       display: block;
       font-weight: 500;
-      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-size: clamp(1.5rem, 4vw, 3rem);
       letter-spacing: 1px;
       word-wrap: break-word;
       text-align: center;
@@ -246,7 +255,7 @@ export default {
       max-width: 500px;
 
       > *:not(:first-child) {
-        margin-top: 10px;
+        margin-top: 12px;
       }
 
       .action {
@@ -271,6 +280,14 @@ export default {
       flex: 1 1 400px;
     }
   }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 1s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
 }
 
 .subtitle {

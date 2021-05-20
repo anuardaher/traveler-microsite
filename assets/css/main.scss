@@ -1,3 +1,5 @@
+@import '~/assets/css/materialIcons.scss';
+
 :root {
   --primary: #35495e;
   --secondary: #d40e14;
@@ -35,7 +37,7 @@ select {
   font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI',
     Roboto, 'Helvetica Neue', Arial, sans-serif;
   width: 100%;
-  height: 55px;
+  min-height: 40px;
   padding: 10px;
   font-size: 1rem;
   border: 1px solid silver;
@@ -48,14 +50,5 @@ select {
     outline: none;
     box-shadow: 0 0 2px var(--secondary);
     border-color: var(--secondary);
-  }
-
-  .list-enter-active,
-  .list-leave-active {
-    transition: all 1s;
-  }
-  .list-enter, .list-leave-to /* .list-leave-active em versões anteriores a 2.1.8 */ {
-    opacity: 0;
-    transform: translateY(30px);
   }
 }

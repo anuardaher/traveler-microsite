@@ -28,7 +28,7 @@ export default {
   width: 100vw;
 
   header {
-    height: 10vh;
+    min-height: 10vh;
   }
 
   main {
@@ -36,7 +36,7 @@ export default {
   }
 
   footer {
-    height: 5vh;
+    min-height: 5vh;
     display: grid;
     place-items: center;
 
