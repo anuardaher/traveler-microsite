@@ -33,11 +33,62 @@ export default {
   modules: [
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
+    'nuxt-i18n',
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
     proxy: true,
+  },
+
+  i18n: {
+    locales: ['en', 'it', 'pt', 'es'],
+    defaultLocale: 'en',
+    vueI18n: {
+      fallbackLocale: 'en',
+      messages: {
+        en: {
+          main_title: 'Find the best hotel for you',
+          country: 'Country',
+          city: 'City',
+          checkin: 'Checkin',
+          checkout: 'Checkout',
+          find_hotels: 'Find Hotels',
+          created_by: 'Created by',
+          searching: 'Searching...',
+        },
+        pt: {
+          main_title: 'Encontre o melhor hotel para você',
+          country: 'País',
+          city: 'Cidade',
+          checkin: 'Entrada',
+          checkout: 'Saída',
+          find_hotels: 'Encontrar hoteis',
+          created_by: 'Criado por',
+          searching: 'Buscando...',
+        },
+        it: {
+          main_title: 'Trova il miglior hotel per te',
+          country: 'Nazione',
+          city: 'Città',
+          checkin: 'Checkin',
+          checkout: 'Checkout',
+          find_hotels: 'Trova hotel',
+          created_by: 'Creato da',
+          searching: 'Ricerca...',
+        },
+        es: {
+          main_title: 'Encuentra el mejor hotel para ti',
+          country: 'País',
+          city: 'Ciudad',
+          checkin: 'Checkin',
+          checkout: 'Checkout',
+          find_hotels: 'Buscar hoteles',
+          created_by: 'Creado por',
+          searching: 'Buscando...',
+        },
+      },
+    },
   },
 
   proxy: {

@@ -7,7 +7,7 @@
     <div
       v-if="returnOption"
       class="error__container__return"
-      @click="$router.push('/')"
+      @click="$router.push(localeLocation('/'))"
     >
       <span class="material-icons">cottage</span>
       <span>Return to home page</span>

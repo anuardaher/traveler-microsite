@@ -65,14 +65,13 @@ export default {
     async init() {
       this.loading = true
       try {
-        debugger
-        const hotel = await this.getHotelData()
+        const hotelData = await this.getHotelData()
         try {
-          const locationKey = await this.getLocationKeys(hotel)
-          hotel.weather = await this.getLocationWeather(locationKey)
-          this.data = hotel
+          const locationKey = await this.getLocationKeys(hotelData.hotel)
+          hotelData.weather = await this.getLocationWeather(locationKey)
+          this.data = hotelData
         } catch (error) {
-          this.data = hotel
+          this.data = hotelData
           this.loading = false
         }
       } catch (error) {
@@ -105,8 +104,8 @@ export default {
       const { data } = await weatherService(this.$axios).getLocationKey(
         `${latitude},${longitude}`
       )
-      if (!data || !data.key) throw new Error('Location key not found')
-      return data.key
+      if (!data || !data.Key) throw new Error('Location key not found')
+      return data.Key
     },
     async getLocationWeather(key) {
       const { data } = await weatherService(this.$axios).getWeatherData(key)

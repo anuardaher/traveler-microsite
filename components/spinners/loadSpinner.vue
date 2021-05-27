@@ -1,7 +1,7 @@
 <template>
   <div class="spinner-wrapper">
     <div class="spinner"></div>
-    <div class="searching-text">Searching...</div>
+    <div class="searching-text">{{ $t('searching') }}</div>
   </div>
 </template>
 

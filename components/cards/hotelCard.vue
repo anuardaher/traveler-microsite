@@ -277,7 +277,7 @@ export default {
       align-items: center;
       color: var(--light);
       font-weight: 600;
-      font-size: 0.9rem;
+      font-size: 1rem;
 
       i {
         font-size: 25px;

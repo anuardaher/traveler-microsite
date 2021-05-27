@@ -3,7 +3,7 @@
     <transition name="fade">
       <div v-if="!isOnSmallDevice || searchState" class="container__find-hotel">
         <h1 class="container__find-hotel__title">
-          Find the best hotel for you
+          {{ $t('main_title') }}
         </h1>
         <form
           class="container__find-hotel__form"
@@ -12,19 +12,19 @@
         >
           <base-select
             v-model="form.country"
-            label="country"
+            :label="$t('country')"
             :options="countrys"
           />
           <base-select
             v-model="form.city"
-            label="city"
+            :label="$t('city')"
             :options="citys"
             :disabled="!form.country"
             :required="!!form.country"
           />
-          <base-input v-model="checkin" type="date" label="checkin" />
-          <base-input v-model="checkout" type="date" label="checkout" />
-          <base-button class="action" text="Find Hotel" type="submit" />
+          <base-input v-model="checkin" type="date" :label="$t('checkin')" />
+          <base-input v-model="checkout" type="date" :label="$t('checkout')" />
+          <base-button class="action" :text="$t('find_hotels')" type="submit" />
         </form>
       </div>
     </transition>
@@ -45,7 +45,7 @@
         v-else
         :key="hotel.self"
         tag="div"
-        :to="`/hotel/${hotel.hotel.hotelId}`"
+        :to="localePath(`/hotel/${hotel.hotel.hotelId}`)"
         class="container__best-hotels__card"
       >
         <hotel-card :data="hotel" clickable />
@@ -280,14 +280,6 @@ export default {
       flex: 1 1 400px;
     }
   }
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 1s;
-}
-.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
-  opacity: 0;
 }
 
 .subtitle {

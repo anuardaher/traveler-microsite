@@ -1,11 +1,21 @@
 <template>
   <nav class="nav">
-    <nuxt-link to="/" class="nav__logo">
+    <nuxt-link :to="localePath('/')" class="nav__logo">
       <img src="/logo_desktop.png" alt="logo" />
     </nuxt-link>
     <div class="nav__actions">
       <ul>
-        <li class="nav__actions__search" @click="setStateSearch()">
+        <li
+          class="nav__actions__language"
+          @click="$root.$emit('select-language')"
+        >
+          <span class="material-icons">language</span>
+        </li>
+        <li
+          v-if="showSearchButtom"
+          class="nav__actions__search"
+          @click="setStateSearch()"
+        >
           <span class="material-icons">create</span>
         </li>
       </ul>
@@ -15,6 +25,11 @@
 
 <script>
 export default {
+  computed: {
+    showSearchButtom() {
+      return window.screen.width < 600 && /index/.test(this.$route.name)
+    },
+  },
   methods: {
     setStateSearch() {
       this.$root.$emit('search')
@@ -30,8 +45,13 @@ export default {
   justify-content: space-between;
   align-items: center;
 
+  &__logo {
+    img {
+      max-width: 100%;
+    }
+  }
+
   &__actions {
-    display: none;
     font-size: 1.2rem;
     text-decoration: none;
 
@@ -40,20 +60,28 @@ export default {
 
       li {
         list-style: none;
-        margin: 20px;
+        margin: 10px;
+        height: 40px;
+        width: 40px;
+        display: grid;
+        place-items: center;
+        color: var(--light);
+        border-radius: 50%;
+        text-decoration: none;
+        transition: color 0.3s;
+        color: var(--light);
 
-        a {
-          text-decoration: none;
-          transition: color 0.3s;
-          color: var(--primary);
+        &:hover {
+          cursor: pointer;
+          opacity: 0.8;
+        }
 
-          &:hover {
-            color: var(--secondary);
-          }
+        &:nth-child(1) {
+          background-color: var(--primary);
+        }
 
-          &:active {
-            text-decoration: var(--secondary);
-          }
+        &:nth-child(2) {
+          background-color: var(--secondary);
         }
       }
     }
@@ -65,25 +93,11 @@ export default {
     justify-content: space-around;
     padding: 6px;
     &__logo {
-      width: 50%;
+      max-width: 50%;
 
       img {
         height: auto;
         width: 100%;
-      }
-    }
-
-    &__actions {
-      display: flex;
-
-      &__search {
-        height: 40px;
-        width: 40px;
-        display: grid;
-        place-items: center;
-        background-color: var(--secondary);
-        color: var(--light);
-        border-radius: 50%;
       }
     }
   }
