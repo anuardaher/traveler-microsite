@@ -1,8 +1,9 @@
 <template>
-  <div class="languages">
+  <div>
+    <div class="dark-background" />
     <transition tag="div" name="fade">
-      <div class="languages__options">
-        <div class="languages__options__close">
+      <div class="options">
+        <div class="options__close">
           <button type="button" @click="$emit('close')">X</button>
         </div>
         <h3>Select the language</h3>
@@ -37,7 +38,7 @@ export default {
 </script>
 
 <style lang="scss">
-.languages {
+.dark-background {
   position: fixed;
   left: 0;
   top: 0;
@@ -45,67 +46,70 @@ export default {
   width: 100%;
   height: 100%;
   z-index: 3;
-  opacity: 0.9;
-  display: grid;
-  place-items: center;
+  opacity: 0.8;
+}
+.options {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  min-height: 310px;
+  background-color: var(--light);
+  padding: 40px 20px;
+  color: var(--primary);
+  opacity: 1;
+  z-index: 4;
+  border-radius: 3px;
 
-  &__options {
-    position: relative;
-    width: 300px;
-    min-height: 310px;
-    background-color: var(--light);
-    padding: 40px 20px;
-    color: var(--primary);
-    opacity: 1;
+  &__close {
+    position: absolute;
+    top: -10px;
+    right: -10px;
 
-    &__close {
-      position: absolute;
-      top: -8px;
-      right: -8px;
+    button {
+      font-weight: 700;
+      border-radius: 50%;
+      border: none;
+      width: 32px;
+      height: 32px;
+      background-color: var(--secondary);
+      color: var(--light);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: transform 0.3s;
 
-      button {
-        font-weight: 700;
-        border-radius: 50%;
-        border: none;
-        width: 32px;
-        height: 32px;
-        background-color: var(--secondary);
-        color: var(--light);
-        display: grid;
-        place-items: center;
-        cursor: pointer;
-        transition: transform 0.3s;
-
-        &:hover {
-          transform: scale(1.15);
-          filter: brightness(1.5);
-        }
+      &:hover {
+        transform: scale(1.1);
+        filter: brightness(1.2);
       }
     }
+  }
 
-    h3 {
-      font-size: 1.5rem;
-      margin-bottom: 20px;
-      text-align: center;
-    }
+  h3 {
+    font-size: 1.5rem;
+    margin-bottom: 25px;
+    text-align: center;
+  }
 
-    ul {
-      list-style: none;
+  ul {
+    list-style: none;
 
-      li {
-        font-size: 1.2rem;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        cursor: pointer;
+    li {
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
 
-        &:not(:first-child) {
-          margin-top: 15px;
-        }
+      &:not(:first-child) {
+        margin-top: 15px;
+      }
 
-        &:hover {
-          text-decoration: underline;
-        }
+      &:hover {
+        text-decoration: underline;
+        filter: brightness(1.3);
       }
     }
   }

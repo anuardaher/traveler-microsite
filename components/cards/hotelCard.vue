@@ -231,7 +231,7 @@ export default {
   border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 5px;
   width: 100%;
-  min-width: 320px;
+  min-width: 300px;
   min-height: 300px;
 
   &__img {
@@ -355,6 +355,7 @@ export default {
           display: flex;
           align-items: center;
           gap: 10px;
+          word-break: break-word;
         }
       }
     }
