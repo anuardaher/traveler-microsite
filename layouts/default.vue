@@ -2,7 +2,7 @@
   <div class="template">
     <header>
       <Header />
-      <Languages v-if="showSelectLanguage" @close="setSelectLanguageValue" />
+      <Languages />
     </header>
     <main>
       <Nuxt keep-alive />
@@ -24,17 +24,6 @@ export default {
     Header,
     Languages,
   },
-  data: () => ({
-    showSelectLanguage: false,
-  }),
-  mounted() {
-    this.$root.$on('select-language', () => this.setSelectLanguageValue())
-  },
-  methods: {
-    setSelectLanguageValue() {
-      this.showSelectLanguage = !this.showSelectLanguage
-    },
-  },
 }
 </script>
 
@@ -44,11 +33,11 @@ export default {
   width: 100vw;
 
   header {
-    min-height: 10vh;
+    min-height: 15vh;
   }
 
   main {
-    min-height: 85vh;
+    min-height: 75vh;
   }
 
   footer {

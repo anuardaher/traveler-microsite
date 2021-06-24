@@ -1,36 +1,56 @@
 <template>
-  <div>
+  <div v-if="showSelectLanguage">
     <div class="dark-background" />
-    <transition tag="div" name="fade">
-      <div class="options">
-        <div class="options__close">
-          <button type="button" @click="$emit('close')">X</button>
-        </div>
-        <h3>Select the language</h3>
-        <ul>
-          <li @click="selectLanguage('en')">
-            <img src="/imgs/flags/united-kingdom.png" alt="english" />English
-          </li>
-          <li @click="selectLanguage('it')">
-            <img src="/imgs/flags/italia.png" alt="italian" />Italian
-          </li>
-          <li @click="selectLanguage('pt')">
-            <img src="/imgs/flags/brasil.png" alt="portuguese" /> Portuguese
-          </li>
-          <li @click="selectLanguage('es')">
-            <img src="/imgs/flags/spain.png" alt="spanish" />Spanish
-          </li>
-        </ul>
+    <div class="options">
+      <div class="options__close">
+        <button type="button" @click="setSelectLanguageValue()">X</button>
       </div>
-    </transition>
+      <h3>Select the language</h3>
+      <ul>
+        <li @click="selectLanguage('en')">
+          <img
+            src="/imgs/flags/united-kingdom.png"
+            alt="english"
+            loading="lazy"
+          />English
+        </li>
+        <li @click="selectLanguage('it')">
+          <img
+            src="/imgs/flags/italia.png"
+            alt="italian"
+            loading="lazy"
+          />Italian
+        </li>
+        <li @click="selectLanguage('pt')">
+          <img src="/imgs/flags/brasil.png" alt="portuguese" loading="lazy" />
+          Portuguese
+        </li>
+        <li @click="selectLanguage('es')">
+          <img
+            src="/imgs/flags/spain.png"
+            alt="spanish"
+            loading="lazy"
+          />Spanish
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
+  data: () => ({
+    showSelectLanguage: false,
+  }),
+  mounted() {
+    this.$root.$on('select-language', () => this.setSelectLanguageValue())
+  },
   methods: {
+    setSelectLanguageValue() {
+      this.showSelectLanguage = !this.showSelectLanguage
+    },
     selectLanguage(language) {
-      this.$emit('close')
+      this.setSelectLanguageValue()
       this.$router.push(this.$i18n.setLocale(language))
     },
   },
@@ -59,7 +79,7 @@ export default {
   padding: 40px 20px;
   color: var(--primary);
   opacity: 1;
-  z-index: 4;
+  z-index: 5;
   border-radius: 3px;
 
   &__close {

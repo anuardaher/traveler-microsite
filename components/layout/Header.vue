@@ -1,7 +1,7 @@
 <template>
   <nav class="nav">
     <nuxt-link :to="localePath('/')" class="nav__logo">
-      <img src="/logo_desktop.png" alt="logo" />
+      <img src="/logo.png" alt="logo" />
     </nuxt-link>
     <div class="nav__actions">
       <ul>
@@ -44,6 +44,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 100%;
 
   &__logo {
     img {
@@ -90,14 +91,14 @@ export default {
 
 @media only screen and (max-width: 600px) {
   .nav {
-    justify-content: space-around;
+    justify-content: space-between;
     padding: 6px;
     &__logo {
-      max-width: 50%;
+      max-width: 100%;
+      height: 100%;
 
       img {
-        height: auto;
-        width: 100%;
+        height: 100%;
       }
     }
   }
